@@ -25,7 +25,7 @@ df = df[df['salario_anual'] >= 24000]
 st.title('📊 Estadísticas de fobal ...')
 st.write('Extraído con Web Scraping de: https://salarysport.com/football/')
 # Análisis Individual
-st.header('🧑‍🤝‍🧑 Análisis Individual')
+st.header('🏃 Análisis Individual')
 
 # Buscador de jugadores
 jugador_seleccionado = st.selectbox(
