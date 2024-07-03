@@ -22,10 +22,10 @@ df = df[df['liga'] != 'J1-League']
 df = df[df['salario_anual'] >= 24000]
 
 # Título del dashboard
-st.title('Estadísticas de fobal ...')
+st.title('📊 Estadísticas de fobal ...')
 st.write('Extraído con Web Scraping de: https://salarysport.com/football/')
 # Análisis Individual
-st.header('Análisis Individual')
+st.header('🧑‍🤝‍🧑 Análisis Individual')
 
 # Buscador de jugadores
 jugador_seleccionado = st.selectbox(
