@@ -60,7 +60,7 @@ if not df_jugador.empty:
 
   # Posición del sueldo
     # Análisis Individual
-    st.header(f'Posición del sueldo de {jugador_seleccionado}')
+    st.header(f'💵 Posición del sueldo de {jugador_seleccionado}')
     st.write(f'Mundo 🌍 #', int(posicion_mundial), ' | Liga 🏆 #', int(posicion_liga), ' | Club 🏟️ #', int(posicion_club))
     url='https://www.youtube.com/results?search_query=Soccer%2B'+jugador_seleccionado+'&sp=CAA%253D'
     url=url.replace(" ", "%2B")
