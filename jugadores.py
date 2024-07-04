@@ -40,6 +40,7 @@ df = df[df['salario_anual'] >= 24000]
 # Título del dashboard
 st.title('📊 Estadísticas de fobal ...')
 st.write('Extraído con Web Scraping de: https://salarysport.com/football/')
+st.caption("Realizado por Lic. Mariano Parada - Data Scientists - mariano.parada@gmail.com - 2024")
 # Análisis Individual
 st.header('🏃 Análisis Individual')
 
