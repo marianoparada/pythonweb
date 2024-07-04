@@ -23,6 +23,16 @@ df = df[df['liga'] != 'j1-league']
 df = df[df['liga'] != 'national-league']
 df = df[df['liga'] != 'indian-super-league']
 df = df[df['liga'] != 'thai-league']
+df = df[df['liga'] != 'i-league']
+df = df[df['liga'] != 'scottish-championship']
+df = df[df['liga'] != 'league-two']
+df = df[df['liga'] != 'ekstraklasa']
+df = df[df['liga'] != 'other']
+df = df[df['liga'] != 'ligue-2']
+
+
+
+
 
 
 df = df[df['salario_anual'] >= 24000]
