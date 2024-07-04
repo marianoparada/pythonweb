@@ -19,6 +19,12 @@ st.set_page_config(
 df = pd.read_excel('jugadores.xlsx')
 df = df.drop_duplicates()
 df = df[df['liga'] != 'J1-League']
+df = df[df['liga'] != 'j1-league']
+df = df[df['liga'] != 'national-league']
+df = df[df['liga'] != 'indian-super-league']
+df = df[df['liga'] != 'thai-league']
+
+
 df = df[df['salario_anual'] >= 24000]
 
 # Título del dashboard
