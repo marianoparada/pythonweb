@@ -19,13 +19,20 @@ st.set_page_config(
 with st.sidebar:
     selected = option_menu(
         menu_title="Menu",  # Opcional
-        options=["Datos Generales", "Liga", "Equipo", "Jugador"],  # Opciones del menú
-        icons=["house", "trophy", "people", "person"],  # Iconos de las opciones
-        menu_icon="cast",  # Icono del menú
+        options=["Inicio","General", "Liga", "Equipo", "Jugador"],  # Opciones del menú
+        icons=["house","newspaper", "trophy", "people", "person"],  # Iconos de las opciones
+        menu_icon="list",  # Icono del menú
         default_index=0,  # Índice de la opción predeterminada
     )
 
 # Funciones para cada opción
+
+def home():
+    # Título del dashboard
+    st.title('📊 Estadísticas de fobal ...')
+    st.write('Extraído con Web Scraping de: https://salarysport.com/football/')
+    st.caption("Realizado por Lic. Mariano Parada - Data Scientists - mariano.parada@gmail.com - 2024")
+    
 def mostrar_datos_generales():
     # Crear el encabezado
     st.header('📊 Información General - Estadísticas')
@@ -62,51 +69,71 @@ def mostrar_datos_liga():
     # Análisis por Liga
     st.header(' 🏆 Información de las ligas')
 
-    liga_seleccionada = st.selectbox('Selecciona una Liga', df['liga'].unique())
+    # Usamos st.empty() para crear contenedores que podemos actualizar
+    liga_container = st.empty()
+    edad_container = st.empty()
+    metricas_container = st.empty()
+    top10_container = st.empty()
+    top20_container = st.empty()
+    club_container = st.empty()
+    comparativa_container = st.empty()
+
+    liga_seleccionada = liga_container.selectbox('Selecciona una Liga', df['liga'].unique())
     df_liga = df[df['liga'] == liga_seleccionada]
 
     # Distribución de edades en la liga seleccionada
     fig_edad_liga = px.histogram(df_liga, x='edad', nbins=20, labels={'edad': 'Edad'}, title=f'Distribución de Edades en {liga_seleccionada}')
-    st.plotly_chart(fig_edad_liga)
+    edad_container.plotly_chart(fig_edad_liga)
 
-    # Promedio de salario anual en la liga seleccionada
-    salario_promedio_liga = df_liga['salario_anual'].mean()
-    st.metric(f'Salario Promedio Anual en {liga_seleccionada}', f'{salario_promedio_liga:.2f}')
+    # Métricas de la liga
+    col1, col2 = metricas_container.columns(2)
+    col1.metric(f'Salario Promedio Anual en {liga_seleccionada}', f'${df_liga["salario_anual"].mean():,.2f}')
+    col2.metric(f'Valor Total de Mercado en {liga_seleccionada}', f'${df_liga["salario_anual"].sum():,.2f}')
 
-    # Valor total de mercado en la liga seleccionada
-    valor_total_liga = df_liga['salario_anual'].sum()
-    st.metric(f'Valor Total de Mercado en {liga_seleccionada}', f'{valor_total_liga:.2f} USD')
+    # 1. Top 10 jugadores mejor pagados de la liga
+    top10_container.subheader(f'Top 10 Jugadores Mejor Pagados de {liga_seleccionada}')
+    top_10_jugadores = df_liga.nlargest(10, 'salario_anual')[['jugador', 'club', 'salario_anual']]
+    top_10_jugadores['salario_anual'] = top_10_jugadores['salario_anual'].apply(lambda x: f'${x:,.0f}')
+    top10_container.table(top_10_jugadores)
+
+    # 2. Promedio de sueldo por equipo de los 20 jugadores mejor pagados de cada plantel
+    top20_container.subheader(f'Promedio de Sueldo de Top 20 Jugadores por Equipo en {liga_seleccionada}')
+    
+    def top_20_avg(group):
+        return group.nlargest(20, 'salario_anual')['salario_anual'].mean()
+
+    promedio_top_20 = df_liga.groupby('club').apply(top_20_avg).sort_values(ascending=False)
+    fig_promedio_top_20 = px.bar(promedio_top_20, x=promedio_top_20.index, y=promedio_top_20.values,
+                                 labels={'x': 'Club', 'y': 'Promedio Salarial Top 20'},
+                                 title=f'Promedio Salarial de Top 20 Jugadores por Club en {liga_seleccionada}')
+    top20_container.plotly_chart(fig_promedio_top_20)
 
     # Análisis por Club
-    st.header('Análisis por Club')
-
-    club_seleccionado = st.selectbox('Selecciona un Club', df['club'].unique())
-    df_club = df[df['club'] == club_seleccionado]
+    club_container.header('Análisis por Club')
+    club_seleccionado = club_container.selectbox('Selecciona un Club', df_liga['club'].unique())
+    df_club = df_liga[df_liga['club'] == club_seleccionado]
 
     # Distribución de posiciones en el club seleccionado
     fig_posicion_club = px.bar(df_club['posición'].value_counts(), labels={'index': 'Posición', 'value': 'Número de Jugadores'}, title=f'Distribución de Posiciones en {club_seleccionado}')
-    st.plotly_chart(fig_posicion_club)
+    club_container.plotly_chart(fig_posicion_club)
 
-    # Promedio de salario anual en el club seleccionado
-    salario_promedio_club = df_club['salario_anual'].mean()
-    st.metric(f'Salario Promedio Anual en {club_seleccionado}', f'{salario_promedio_club:.2f}')
-
-    # Valor total de mercado en el club seleccionado
-    valor_total_club = df_club['salario_anual'].sum()
-    st.metric(f'Valor Total de Mercado en {club_seleccionado}', f'{valor_total_club:.2f} USD')
+    # Métricas del club
+    col1, col2 = club_container.columns(2)
+    col1.metric(f'Salario Promedio Anual en {club_seleccionado}', f'${df_club["salario_anual"].mean():,.2f}')
+    col2.metric(f'Valor Total de Mercado en {club_seleccionado}', f'${df_club["salario_anual"].sum():,.2f}')
 
     # Comparativa entre Ligas/Clubs
-    st.header('Comparativa entre Ligas/Clubs')
+    comparativa_container.header('Comparativa entre Ligas/Clubs')
 
     # Comparativa de salario promedio entre ligas
     salario_promedio_ligas = df.groupby('liga')['salario_anual'].mean().sort_values(ascending=False)
     fig_salario_ligas = px.bar(salario_promedio_ligas, x=salario_promedio_ligas.index, y=salario_promedio_ligas.values, labels={'x': 'Liga', 'y': 'Salario Promedio Anual'}, title='Comparativa de Salario Promedio entre Ligas')
-    st.plotly_chart(fig_salario_ligas)
+    comparativa_container.plotly_chart(fig_salario_ligas)
 
     # Comparativa de valor total de mercado entre clubs
     valor_total_clubs = df.groupby('club')['salario_anual'].sum().sort_values(ascending=False)
     fig_valor_clubs = px.bar(valor_total_clubs, x=valor_total_clubs.index, y=valor_total_clubs.values, labels={'x': 'Club', 'y': 'Valor Total de Mercado (USD)'}, title='Comparativa de Valor Total de Mercado entre Clubs')
-    st.plotly_chart(fig_valor_clubs)
+    comparativa_container.plotly_chart(fig_valor_clubs)
     
     
     
@@ -273,14 +300,14 @@ df = df[df['liga'] != 'ligue-2']
 # Filtramos los salarios que cobren menos de 2.000 USD por mes
 df = df[df['salario_anual'] >= 24000]
 
-# Título del dashboard
-st.title('📊 Estadísticas de fobal ...')
-st.write('Extraído con Web Scraping de: https://salarysport.com/football/')
-st.caption("Realizado por Lic. Mariano Parada - Data Scientists - mariano.parada@gmail.com - 2024")
+
 
 
 
 # Mostrar el contenido basado en la selección del menú
+if selected == "Inicio":
+    home()
+
 if selected == "Datos Generales":
     mostrar_datos_generales()
 elif selected == "Liga":
