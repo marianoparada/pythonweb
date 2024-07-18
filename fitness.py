@@ -1,7 +1,42 @@
 import streamlit as st
 import random
 import time
+from docx import Document
+from docx.shared import Inches
+import io
 
+def guardar_rutina_word(rutina):
+    doc = Document()
+    doc.add_heading('FA FITNESS - Rutina Personalizada', 0)
+
+    vuelta_actual = 1
+    for grupo, ejercicio, duracion, instruccion, vuelta, num_ejercicio, total_ejercicios in rutina:
+        if vuelta != vuelta_actual:
+            doc.add_paragraph('---')
+            doc.add_paragraph(f'Vuelta {vuelta}')
+            vuelta_actual = vuelta
+        if grupo == "Descanso":
+            if ejercicio == "Descanso entre vueltas":
+                doc.add_paragraph(f'Descanso entre vueltas: {duracion} segundos')
+            else:
+                doc.add_paragraph(f'Descanso: {duracion} segundos')
+        else:
+            doc.add_paragraph(f'Ejercicio {num_ejercicio}/{total_ejercicios}: {grupo} - {ejercicio}: {duracion} segundos')
+            doc.add_paragraph(f'Instrucción: {instruccion}')
+
+    # Guardar el documento en un objeto BytesIO
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    # Botón de descarga
+    st.download_button(
+        label="Guardar Rutina",
+        data=buffer,
+        file_name="FA_FITNESS_Rutina.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        key="descargar_rutina"
+    )
 # Configuración de la página
 st.set_page_config(page_title="FA FITNESS - Generador de Rutinas", layout="wide")
 
@@ -93,23 +128,29 @@ def generar_rutina(prioridad, duracion, tiempo_descanso, vueltas):
         for i, ejercicio in enumerate(rutina_base, 1):
             grupo, nombre_ejercicio, tiempo, instruccion = ejercicio
             rutina_completa.append((grupo, nombre_ejercicio, tiempo, instruccion, vuelta, i, len(rutina_base)))
-        if vuelta < vueltas:  # No añadir descanso después de la última vuelta
-            rutina_completa.append(("Descanso", "Descanso entre vueltas", tiempo_descanso, "Toma un breve descanso antes de la siguiente vuelta", vuelta, len(rutina_base) + 1, len(rutina_base) + 1))
+            if i < len(rutina_base):  # Añadir descanso después de cada ejercicio, excepto el último
+                rutina_completa.append(("Descanso", "Descanso entre ejercicios", tiempo_descanso, "Toma un breve descanso antes del siguiente ejercicio", vuelta, None, None))
+        if vuelta < vueltas:  # Añadir descanso largo entre vueltas
+            rutina_completa.append(("Descanso", "Descanso entre vueltas", tiempo_descanso * 5, "Toma un descanso más largo antes de la siguiente vuelta", vuelta, None, None))
     
     return rutina_completa
 
 def mostrar_rutina(rutina):
-    st.title("🏋️ FA FITNESS - Tu Rutina Personalizada")
+    st.title("🏋️ FA FITNESS - Rutina Personalizada")
     vuelta_actual = 1
-    for grupo, ejercicio, duracion, _, vuelta, num_ejercicio, total_ejercicios in rutina:
+    for grupo, ejercicio, duracion, instruccion, vuelta, num_ejercicio, total_ejercicios in rutina:
         if vuelta != vuelta_actual:
             st.write("---")
             st.write(f"Vuelta {vuelta}")
             vuelta_actual = vuelta
         if grupo == "Descanso":
-            st.write(f"{grupo}: {duracion} segundos")
+            if ejercicio == "Descanso entre vueltas":
+                st.write(f"Descanso entre vueltas: {duracion} segundos")
+            else:
+                st.write(f"Descanso: {duracion} segundos")
         else:
             st.write(f"Ejercicio {num_ejercicio}/{total_ejercicios}: {grupo} - {ejercicio}: {duracion} segundos")
+            st.write(f"Instrucción: {instruccion}")
 
 def temporizador(rutina):
     st.title("🏋️ FA FITNESS - Temporizador de Rutina")
@@ -117,16 +158,24 @@ def temporizador(rutina):
     if 'ejercicio_actual' not in st.session_state:
         st.session_state.ejercicio_actual = 0
         st.session_state.tiempo_restante = rutina[0][2]
-        st.session_state.en_descanso = False
     
     grupo, ejercicio, duracion, instruccion, vuelta, num_ejercicio, total_ejercicios = rutina[st.session_state.ejercicio_actual]
     
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        st.markdown(f"<h3 style='text-align: center;'>Vuelta {vuelta}/{st.session_state.vueltas} - Ejercicio {num_ejercicio}/{total_ejercicios}</h3>", unsafe_allow_html=True)
+        if grupo != "Descanso":
+            st.markdown(f"<h3 style='text-align: center;'>Vuelta {vuelta}/{st.session_state.vueltas} - Ejercicio {num_ejercicio}/{total_ejercicios}</h3>", unsafe_allow_html=True)
         
         if grupo == "Descanso":
-            st.markdown("<h1 style='text-align: center;'>Descanso entre vueltas</h1>", unsafe_allow_html=True)
+            if ejercicio == "Descanso entre vueltas":
+                st.markdown("<h1 style='text-align: center;'>Descanso entre vueltas</h1>", unsafe_allow_html=True)
+            else:
+                st.markdown("<h1 style='text-align: center;'>Descanso</h1>", unsafe_allow_html=True)
+            # Mostrar el próximo ejercicio
+            proximo_indice = st.session_state.ejercicio_actual + 1
+            if proximo_indice < len(rutina):
+                proximo_ejercicio = rutina[proximo_indice][1]
+                st.markdown(f"<h3 style='text-align: center;'>Próximo ejercicio: {proximo_ejercicio}</h3>", unsafe_allow_html=True)
         else:
             st.markdown(f"<h1 style='text-align: center;'>{grupo}</h1>", unsafe_allow_html=True)
             st.markdown(f"<h2 style='text-align: center;'>{ejercicio}</h2>", unsafe_allow_html=True)
@@ -173,9 +222,12 @@ def main():
             ["30 segundos", "40 segundos", "Ambos aleatorios"]
         )
         
-        tiempo_descanso = st.selectbox(
-            "Selecciona el tiempo de descanso entre vueltas:",
-            [5, 10, 15]
+        tiempo_descanso = st.number_input(
+            "Selecciona el tiempo de descanso entre ejercicios (en segundos):",
+            min_value=5,
+            max_value=60,
+            value=15,
+            step=5
         )
         
         vueltas = st.number_input(
@@ -186,24 +238,38 @@ def main():
         )
         
         if st.button("Generar Rutina", key="generar_rutina"):
-            st.session_state.rutina = generar_rutina(prioridad, duracion, tiempo_descanso, vueltas)
-            st.session_state.prioridad = prioridad
-            st.session_state.duracion = duracion
-            st.session_state.tiempo_descanso = tiempo_descanso
-            st.session_state.vueltas = vueltas
+            with st.spinner("Generando tu rutina personalizada..."):
+                time.sleep(2)  # Espera 2 segundos
+                st.session_state.rutina = generar_rutina(prioridad, duracion, tiempo_descanso, vueltas)
+                st.session_state.prioridad = prioridad
+                st.session_state.duracion = duracion
+                st.session_state.tiempo_descanso = tiempo_descanso
+                st.session_state.vueltas = vueltas
+            st.success("¡Rutina generada con éxito!")
             st.experimental_rerun()
     
     elif 'timer_running' not in st.session_state:
-        mostrar_rutina(st.session_state.rutina)
-        
-        col1, col2 = st.columns(2)
-        if col1.button("🔄 Refresh Rutina", key="refresh_rutina"):
-            st.session_state.rutina = generar_rutina(st.session_state.prioridad, st.session_state.duracion)
-            st.experimental_rerun()
-        
-        if col2.button("Iniciar Temporizador", key="iniciar_temporizador_main"):
-            st.session_state.timer_running = True
-            st.experimental_rerun()
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            st.markdown(
+                """
+                <style>
+                div.stButton > button {
+                    width: 100%;
+                    height: 3em;
+                    font-size: 20px;
+                }
+                </style>
+                """, 
+                unsafe_allow_html=True
+            )
+            if st.button("Comenzar Rutina", key="comenzar_rutina"):
+                st.session_state.timer_running = True
+                st.session_state.ejercicio_actual = 0
+                st.session_state.tiempo_restante = st.session_state.rutina[0][2]
+                st.experimental_rerun()
+            
+            guardar_rutina_word(st.session_state.rutina)
     
     else:
         temporizador(st.session_state.rutina)
