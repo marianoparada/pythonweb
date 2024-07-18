@@ -153,7 +153,7 @@ def mostrar_rutina(rutina):
             st.write(f"Instrucción: {instruccion}")
 
 def temporizador(rutina):
-    st.title("🏋️ FA FITNESS - Temporizador de Rutina")
+    st.title("🏋️ FA FITNESS - A entrenar !")
     
     if 'ejercicio_actual' not in st.session_state:
         st.session_state.ejercicio_actual = 0
