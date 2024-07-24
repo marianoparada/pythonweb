@@ -5,6 +5,15 @@ from docx import Document
 from docx.shared import Inches
 import io
 
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
 def guardar_rutina_word(rutina):
     doc = Document()
     doc.add_heading('Fitness - Rutina Personalizada', 0)
@@ -38,7 +47,7 @@ def guardar_rutina_word(rutina):
         key="descargar_rutina"
     )
 # Configuración de la página
-st.set_page_config(page_title="Fitness - Generador de Rutinas", layout="wide")
+#st.set_page_config(page_title="Fitness - Generador de Rutinas", layout="wide")
 
 
 ejercicios = {
