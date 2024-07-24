@@ -234,12 +234,12 @@ def main():
         vueltas = st.number_input(
             "Número de vueltas:",
             min_value=1,
-            max_value=10,
-            value=1
+            max_value=6,
+            value=3
         )
         
         if st.button("Generar Rutina", key="generar_rutina"):
-            with st.spinner("Generando tu rutina personalizada..."):
+            with st.spinner("Generando rutina personalizada..."):
                 time.sleep(2)  # Espera 2 segundos
                 st.session_state.rutina = generar_rutina(prioridad, duracion, tiempo_descanso, vueltas)
                 st.session_state.prioridad = prioridad
@@ -264,13 +264,14 @@ def main():
                 """, 
                 unsafe_allow_html=True
             )
+            st.image("entrena3.png", use_column_width=True)
             if st.button("Comenzar Rutina", key="comenzar_rutina"):
                 st.session_state.timer_running = True
                 st.session_state.ejercicio_actual = 0
                 st.session_state.tiempo_restante = st.session_state.rutina[0][2]
                 st.experimental_rerun()
             
-            guardar_rutina_word(st.session_state.rutina)
+            #guardar_rutina_word(st.session_state.rutina)
     
     else:
         temporizador(st.session_state.rutina)
