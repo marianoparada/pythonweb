@@ -7,7 +7,7 @@ import io
 
 def guardar_rutina_word(rutina):
     doc = Document()
-    doc.add_heading('FA FITNESS - Rutina Personalizada', 0)
+    doc.add_heading('Fitness - Rutina Personalizada', 0)
 
     vuelta_actual = 1
     for grupo, ejercicio, duracion, instruccion, vuelta, num_ejercicio, total_ejercicios in rutina:
@@ -33,12 +33,12 @@ def guardar_rutina_word(rutina):
     st.download_button(
         label="Guardar Rutina",
         data=buffer,
-        file_name="FA_FITNESS_Rutina.docx",
+        file_name="FITNESS_Rutina.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         key="descargar_rutina"
     )
 # Configuración de la página
-st.set_page_config(page_title="FA FITNESS - Generador de Rutinas", layout="wide")
+st.set_page_config(page_title="Fitness - Generador de Rutinas", layout="wide")
 
 
 ejercicios = {
@@ -136,7 +136,7 @@ def generar_rutina(prioridad, duracion, tiempo_descanso, vueltas):
     return rutina_completa
 
 def mostrar_rutina(rutina):
-    st.title("🏋️ FA FITNESS - Rutina Personalizada")
+    st.title("🏋️ Fitness - Rutina Personalizada")
     vuelta_actual = 1
     for grupo, ejercicio, duracion, instruccion, vuelta, num_ejercicio, total_ejercicios in rutina:
         if vuelta != vuelta_actual:
@@ -153,8 +153,8 @@ def mostrar_rutina(rutina):
             st.write(f"Instrucción: {instruccion}")
 
 def temporizador(rutina):
-    st.title("🏋️ FA FITNESS - A entrenar !")
-    
+    #st.title("🏋️ FITNESS - A entrenar !")
+    st.image("entrena2.png", use_column_width=True)
     if 'ejercicio_actual' not in st.session_state:
         st.session_state.ejercicio_actual = 0
         st.session_state.tiempo_restante = rutina[0][2]
@@ -210,7 +210,8 @@ def temporizador(rutina):
 
 def main():
     if 'rutina' not in st.session_state:
-        st.title("🏋️ FA FITNESS - Generador de Rutinas")
+        #st.title("🏋️  Fitness - Generador de Rutinas")
+        st.image("entrena1.png", use_column_width=True)
         
         prioridad = st.selectbox(
             "Selecciona la prioridad de tu rutina:",
