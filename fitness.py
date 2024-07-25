@@ -281,7 +281,23 @@ def main():
                 st.experimental_rerun()
             
             #guardar_rutina_word(st.session_state.rutina)
-    
+            st.title("Poné Musica ... ")
+            st.image("spotify.png", width=200)  # Ajusta el ancho según necesites
+            st.markdown(f"La música se abrirá en la aplicación, debes volver para hacer clic en COMENZAR RUTINA")
+            # Función para crear un enlace con icono de música
+            def spotify_link(text, url):
+                return st.markdown(f"🎵 [{text}]({url})")
+
+            # Lista de reproducción 1
+            spotify_playlist_url1 = "https://open.spotify.com/intl-es/track/7BExBy99xIVD7moauE290a?si=5d08e19cd3fd4cd2"
+            spotify_link("Lista de reproducción Inglés", spotify_playlist_url1)
+
+            # Lista de reproducción 2
+            spotify_playlist_url2 = "https://open.spotify.com/intl-es/track/1hWpzhGIPOQ7gKz3ut5eVs?si=f3891cf314774ac0"
+            spotify_link("Lista de reproducción Latino", spotify_playlist_url2)
+            # Crear un enlace a una lista de Spotify
+            
+
     else:
         temporizador(st.session_state.rutina)
 
