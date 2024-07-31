@@ -212,10 +212,10 @@ def temporizador(rutina):
                 if st.button("Volver al inicio", key="volver_inicio"):
                     for key in list(st.session_state.keys()):
                         del st.session_state[key]
-                    st.experimental_rerun()
+                    st.rerun()
                 return
         
-        st.experimental_rerun()
+        st.rerun()
 
 def main():
     if 'rutina' not in st.session_state:
@@ -256,7 +256,7 @@ def main():
                 st.session_state.tiempo_descanso = tiempo_descanso
                 st.session_state.vueltas = vueltas
             st.success("¡Rutina generada con éxito!")
-            st.experimental_rerun()
+            st.rerun()
     
     elif 'timer_running' not in st.session_state:
         col1, col2, col3 = st.columns([1,2,1])
@@ -278,7 +278,7 @@ def main():
                 st.session_state.timer_running = True
                 st.session_state.ejercicio_actual = 0
                 st.session_state.tiempo_restante = st.session_state.rutina[0][2]
-                st.experimental_rerun()
+                st.rerun()
             
             #guardar_rutina_word(st.session_state.rutina)
             st.title("Poné Musica ... ")
